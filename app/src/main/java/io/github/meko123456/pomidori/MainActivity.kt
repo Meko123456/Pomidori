@@ -7,8 +7,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.compose.BackHandler
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.meko123456.pomidori.ui.SettingsScreen
+import io.github.meko123456.pomidori.ui.SettingsViewModel
 import io.github.meko123456.pomidori.ui.TimerScreen
 import io.github.meko123456.pomidori.ui.theme.PomidoriTheme
 
@@ -23,7 +31,17 @@ class MainActivity : ComponentActivity() {
         maybeRequestNotifications()
         setContent {
             PomidoriTheme {
-                TimerScreen()
+                // Created here so its init syncs saved settings into the timer on launch.
+                val settingsVm: SettingsViewModel = viewModel()
+                var showSettings by remember { mutableStateOf(false) }
+
+                BackHandler(enabled = showSettings) { showSettings = false }
+
+                if (showSettings) {
+                    SettingsScreen(onBack = { showSettings = false }, vm = settingsVm)
+                } else {
+                    TimerScreen(onOpenSettings = { showSettings = true })
+                }
             }
         }
     }
