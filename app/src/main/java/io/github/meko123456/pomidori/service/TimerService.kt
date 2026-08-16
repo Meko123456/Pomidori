@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
@@ -100,14 +101,31 @@ class TimerService : Service() {
             this, 0, Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
+        val running = s.timer.status == TimerStatus.RUNNING
+        val primary = if (running) {
+            action(android.R.drawable.ic_media_pause, "Pause", ACTION_PRIMARY)
+        } else {
+            action(android.R.drawable.ic_media_play, "Resume", ACTION_PRIMARY)
+        }
         return Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("${phaseLabel(s.position.phase)}$paused")
             .setContentText(time)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setOngoing(s.timer.status == TimerStatus.RUNNING)
+            .setOngoing(running)
             .setOnlyAlertOnce(true)
             .setContentIntent(openApp)
+            .addAction(primary)
+            .addAction(action(android.R.drawable.ic_media_next, "Skip", ACTION_SKIP))
             .build()
+    }
+
+    /** A notification action button that sends [act] back to this service. */
+    private fun action(iconRes: Int, label: String, act: String): Notification.Action {
+        val pi = PendingIntent.getService(
+            this, act.hashCode(), Intent(this, TimerService::class.java).setAction(act),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        return Notification.Action.Builder(Icon.createWithResource(this, iconRes), label, pi).build()
     }
 
     private fun ensureChannel() {
