@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,8 +31,9 @@ import kotlin.math.ceil
 
 @Composable
 fun TimerScreen(vm: TimerViewModel = viewModel()) {
-    val timer = vm.timer
-    val position = vm.position
+    val snapshot by vm.state.collectAsState()
+    val timer = snapshot.timer
+    val position = snapshot.position
     val accent = when (position.phase) {
         Phase.FOCUS -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.secondary
@@ -85,7 +87,7 @@ fun TimerScreen(vm: TimerViewModel = viewModel()) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
             ) {
                 OutlinedButton(onClick = vm::reset) { Text("Reset") }
-                Button(onClick = vm::toggle, modifier = Modifier.size(width = 140.dp, height = 48.dp)) {
+                Button(onClick = vm::primary, modifier = Modifier.size(width = 140.dp, height = 48.dp)) {
                     Text(primaryLabel(timer.status))
                 }
                 OutlinedButton(onClick = vm::skip) { Text("Skip") }
