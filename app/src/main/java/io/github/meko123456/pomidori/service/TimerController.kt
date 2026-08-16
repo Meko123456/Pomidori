@@ -59,7 +59,10 @@ object TimerController {
             val ticked = TimerEngine.tick(s.timer, deltaMillis)
             if (ticked.status == TimerStatus.FINISHED) {
                 finished = true
-                idle(PomodoroCycle.next(s.position, config))
+                val next = PomodoroCycle.next(s.position, config)
+                val duration = PomodoroCycle.duration(next.phase, config)
+                val nextTimer = if (config.autoStartNext) TimerEngine.start(duration) else TimerState.idle(duration)
+                TimerSnapshot(next, nextTimer)
             } else {
                 s.copy(timer = ticked)
             }

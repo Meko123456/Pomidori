@@ -8,6 +8,8 @@ data class PomodoroConfig(
     val shortBreakMillis: Long = 5 * 60_000L,
     val longBreakMillis: Long = 15 * 60_000L,
     val sessionsBeforeLongBreak: Int = 4,
+    /** When true, a finished phase rolls straight into the next one running. */
+    val autoStartNext: Boolean = true,
 )
 
 /** Where we are in the repeating cycle: the current phase and how many focus sessions are done. */

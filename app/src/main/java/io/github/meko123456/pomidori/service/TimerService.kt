@@ -8,9 +8,13 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
+import android.media.RingtoneManager
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import io.github.meko123456.pomidori.MainActivity
 import io.github.meko123456.pomidori.timer.Phase
 import io.github.meko123456.pomidori.timer.TimerStatus
@@ -72,12 +76,18 @@ class TimerService : Service() {
                 val now = SystemClock.elapsedRealtime()
                 val finished = TimerController.tick(now - lastMark)
                 lastMark = now
-                updateNotification()
                 if (finished) {
-                    // Phase ended; state is now idle on the next phase — leave it for the user.
-                    stopAll()
-                    return@launch
+                    chimeAndVibrate()
+                    if (!TimerController.snapshot.isRunning) {
+                        // Auto-start is off — the next phase waits idle for the user.
+                        updateNotification()
+                        stopAll()
+                        return@launch
+                    }
+                    // Auto-started the next phase; keep looping from now.
+                    lastMark = SystemClock.elapsedRealtime()
                 }
+                updateNotification()
             }
         }
     }
@@ -86,6 +96,22 @@ class TimerService : Service() {
         loopJob?.cancel(); loopJob = null
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
+    }
+
+    /** Short chime + buzz to mark a phase boundary. */
+    private fun chimeAndVibrate() {
+        runCatching {
+            val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            RingtoneManager.getRingtone(applicationContext, uri)?.play()
+        }
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            getSystemService(VibratorManager::class.java).defaultVibrator
+        } else {
+            @Suppress("DEPRECATION") getSystemService(Vibrator::class.java)
+        }
+        runCatching {
+            vibrator.vibrate(VibrationEffect.createOneShot(450, VibrationEffect.DEFAULT_AMPLITUDE))
+        }
     }
 
     private fun updateNotification() =
