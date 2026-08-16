@@ -39,6 +39,7 @@ import kotlin.math.ceil
 @Composable
 fun TimerScreen(onOpenSettings: () -> Unit = {}, vm: TimerViewModel = viewModel()) {
     val snapshot by vm.state.collectAsState()
+    val tallyToday by vm.tallyToday.collectAsState()
     val timer = snapshot.timer
     val position = snapshot.position
     val accent = when (position.phase) {
@@ -70,7 +71,7 @@ fun TimerScreen(onOpenSettings: () -> Unit = {}, vm: TimerViewModel = viewModel(
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "${position.completedFocusSessions} focus sessions done",
+                text = "🍅 $tallyToday focus ${if (tallyToday == 1) "session" else "sessions"} today",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp),

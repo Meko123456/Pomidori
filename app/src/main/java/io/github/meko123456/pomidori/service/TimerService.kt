@@ -16,8 +16,10 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import io.github.meko123456.pomidori.MainActivity
+import io.github.meko123456.pomidori.data.SessionTallyRepository
 import io.github.meko123456.pomidori.timer.Phase
 import io.github.meko123456.pomidori.timer.TimerStatus
+import java.time.LocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -35,6 +37,7 @@ import kotlin.math.ceil
 class TimerService : Service() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val tally by lazy { SessionTallyRepository(applicationContext) }
     private var loopJob: Job? = null
     private var lastMark = 0L
 
@@ -74,9 +77,13 @@ class TimerService : Service() {
             while (TimerController.snapshot.isRunning) {
                 delay(250)
                 val now = SystemClock.elapsedRealtime()
+                val finishingPhase = TimerController.snapshot.position.phase
                 val finished = TimerController.tick(now - lastMark)
                 lastMark = now
                 if (finished) {
+                    if (finishingPhase == Phase.FOCUS) {
+                        scope.launch { tally.increment(LocalDate.now().toEpochDay()) }
+                    }
                     chimeAndVibrate()
                     if (!TimerController.snapshot.isRunning) {
                         // Auto-start is off — the next phase waits idle for the user.
