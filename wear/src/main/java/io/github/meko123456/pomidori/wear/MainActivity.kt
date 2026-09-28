@@ -26,16 +26,23 @@ import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.CompactButton
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
-import io.github.meko123456.pomidori.timer.NotificationContent
 import io.github.meko123456.pomidori.timer.TimerController
 import io.github.meko123456.pomidori.timer.TimerSnapshot
-import io.github.meko123456.pomidori.timer.TimerStatus
+import io.github.meko123456.pomidori.wear.tile.TileContent
 
-/** The watch's timer screen: the phase, the time left, and the buttons that drive the service. */
+/**
+ * The watch's timer screen, and the way in from the tile.
+ *
+ * A tile cannot start a foreground service itself, and an activity the user just opened can, so the
+ * tile's button launches this with [EXTRA_COMMAND] and the command is passed on from here.
+ */
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Only on a fresh launch: after a configuration change the launch intent comes back with
+        // the same extra, and running it twice would pause what the first tap started.
+        if (savedInstanceState == null) handle(intent)
         askForNotifications()
 
         setContent {
@@ -48,6 +55,15 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handle(intent)
+    }
+
+    private fun handle(intent: Intent?) {
+        if (intent?.getStringExtra(EXTRA_COMMAND) == COMMAND_PRIMARY) send(WatchTimerService.ACTION_PRIMARY)
     }
 
     private fun send(action: String) {
@@ -64,16 +80,17 @@ class MainActivity : ComponentActivity() {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
         }
     }
+
+    companion object {
+        const val EXTRA_COMMAND = "io.github.meko123456.pomidori.wear.COMMAND"
+        const val COMMAND_PRIMARY = "primary"
+    }
 }
 
 @Composable
 private fun TimerScreen(snapshot: TimerSnapshot, onPrimary: () -> Unit, onSkip: () -> Unit) {
-    val content = NotificationContent.of(snapshot)
-    val action = when (snapshot.timer.status) {
-        TimerStatus.IDLE, TimerStatus.FINISHED -> "Start"
-        TimerStatus.RUNNING -> "Pause"
-        TimerStatus.PAUSED -> "Resume"
-    }
+    // The tile's words, for the same state, so the two never describe it differently.
+    val content = TileContent.of(snapshot, nowEpochMillis = 0)
     AppScaffold {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(
@@ -90,7 +107,7 @@ private fun TimerScreen(snapshot: TimerSnapshot, onPrimary: () -> Unit, onSkip: 
                     style = MaterialTheme.typography.numeralMedium,
                     modifier = Modifier.semantics { contentDescription = "${content.time} left" },
                 )
-                Button(onClick = onPrimary) { Text(action) }
+                Button(onClick = onPrimary) { Text(content.action) }
                 CompactButton(onClick = onSkip) { Text("Skip") }
             }
         }

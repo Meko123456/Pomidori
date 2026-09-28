@@ -44,5 +44,13 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.wear.compose.material3)
     implementation(libs.wear.compose.foundation)
+
+    implementation(libs.wear.tiles)
+    implementation(libs.wear.protolayout)
+    implementation(libs.wear.protolayout.expression)
+    implementation(libs.wear.protolayout.material3)
+    implementation(libs.androidx.concurrent.futures.ktx)
     implementation(libs.wear.ongoing)
+
+    testImplementation(libs.junit)
 }

@@ -15,10 +15,12 @@ import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
+import androidx.wear.tiles.TileService
 import io.github.meko123456.pomidori.timer.NotificationContent
 import io.github.meko123456.pomidori.timer.TimerController
 import io.github.meko123456.pomidori.timer.TimerSnapshot
 import io.github.meko123456.pomidori.timer.TimerStatus
+import io.github.meko123456.pomidori.wear.tile.PomidoriTileService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,10 +34,10 @@ import kotlinx.coroutines.launch
  * service so a session keeps going with the screen off.
  *
  * It differs from the phone's service in what it keeps up to date. The notification carries an
- * ongoing activity whose timer counts down on the watch face by itself, so it does not need a post
- * per second: it is refreshed when something a person would notice changes — a start, a pause, a
- * skip, a phase ending — and not on the ticks in between, which only keep the controller exact for
- * whoever reads it next.
+ * ongoing activity whose timer counts down on the watch face by itself, and the tile does the same
+ * from the end time it is given, so neither needs a post per second: both are refreshed when
+ * something a person would notice changes — a start, a pause, a skip, a phase ending — and not on
+ * the ticks in between, which only keep the controller exact for whoever reads it next.
  */
 class WatchTimerService : Service() {
 
@@ -91,9 +93,10 @@ class WatchTimerService : Service() {
         }
     }
 
-    /** Re-posts the notification, which is where a change is seen. */
+    /** Re-posts the notification and asks for a fresh tile: the two places a change is seen. */
     private fun showChange() {
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification(TimerController.snapshot))
+        TileService.getUpdater(this).requestUpdate(PomidoriTileService::class.java)
     }
 
     private fun notification(snapshot: TimerSnapshot): Notification {

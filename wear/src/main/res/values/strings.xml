@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Pomidori</string>
+    <string name="tile_label">Focus</string>
+    <string name="tile_description">Start, pause or resume a focus session</string>
 </resources>
