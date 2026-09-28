@@ -22,20 +22,22 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      # The unit tests live in :timer now, with the code they test.
+      # The unit tests live with the code they test: the timer in :timer, the tile's words in :wear.
       - name: Build, lint and unit tests
-        run: ./gradlew :timer:test :app:assembleDebug :app:lintDebug --stacktrace
+        run: ./gradlew :timer:test :app:assembleDebug :app:lintDebug :wear:testDebugUnitTest :wear:assembleDebug :wear:lintDebug --stacktrace
 
       # Debug builds never run R8, so the shrinker was configured here and never once executed.
       # Without this step, the first time code shrinking runs is release day, which is the worst
       # possible day to learn it removed something the app needed. lintVitalRelease is the
       # release-blocking subset of lint, which debug lint does not cover either.
       - name: Release build (R8 + release-blocking lint)
-        run: ./gradlew :app:assembleRelease :app:lintVitalRelease --stacktrace
+        run: ./gradlew :app:assembleRelease :app:lintVitalRelease :wear:assembleRelease :wear:lintVitalRelease --stacktrace
 
       - name: Upload lint report
         if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: lint-report
-          path: app/build/reports/lint-results-debug.html
+          path: |
+            app/build/reports/lint-results-debug.html
+            wear/build/reports/lint-results-debug.html
