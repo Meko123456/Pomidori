@@ -7,6 +7,8 @@ lifecycle = "2.10.0"
 datastore = "1.1.7"
 junit = "4.13.2"
 coroutines = "1.9.0"
+wearCompose = "1.7.0"
+wearOngoing = "1.1.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -20,6 +22,9 @@ androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+wear-compose-material3 = { module = "androidx.wear.compose:compose-material3", version.ref = "wearCompose" }
+wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "wearCompose" }
+wear-ongoing = { module = "androidx.wear:wear-ongoing", version.ref = "wearOngoing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

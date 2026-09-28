@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tomato — the pomodoro (Italian for "tomato") that names the technique. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Tomato body -->
+    <path
+        android:fillColor="#E23B2E"
+        android:pathData="M54,38 C68.9,38 81,49.9 81,65 C81,78.9 68.9,89 54,89 C39.1,89 27,78.9 27,65 C27,49.9 39.1,38 54,38 Z" />
+    <!-- Shine highlight -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.28"
+        android:pathData="M43,52 m-6,0 a6,7 0 1,0 12,0 a6,7 0 1,0 -12,0 z" />
+    <!-- Stem -->
+    <path
+        android:fillColor="#43A047"
+        android:pathData="M52,30 h4 v12 h-4 z" />
+    <!-- Calyx leaves -->
+    <path
+        android:fillColor="#43A047"
+        android:pathData="M54,44 L38,34 L48,46 Z M54,44 L70,34 L60,46 Z M54,44 L48,30 L60,30 Z" />
+</vector>

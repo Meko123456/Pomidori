@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The launcher tomato as one white silhouette, for the notification and the watch face, where
+     the system tints it and colour would be thrown away. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,38 C68.9,38 81,49.9 81,65 C81,78.9 68.9,89 54,89 C39.1,89 27,78.9 27,65 C27,49.9 39.1,38 54,38 Z M52,30 h4 v12 h-4 z M54,44 L38,34 L48,46 Z M54,44 L70,34 L60,46 Z M54,44 L48,30 L60,30 Z" />
+</vector>
