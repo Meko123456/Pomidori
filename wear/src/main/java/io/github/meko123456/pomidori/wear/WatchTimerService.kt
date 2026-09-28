@@ -18,6 +18,7 @@ import androidx.wear.ongoing.Status
 import androidx.wear.tiles.TileService
 import io.github.meko123456.pomidori.timer.NotificationContent
 import io.github.meko123456.pomidori.timer.TimerController
+import io.github.meko123456.pomidori.timer.TimerLoop
 import io.github.meko123456.pomidori.timer.TimerSnapshot
 import io.github.meko123456.pomidori.timer.TimerStatus
 import io.github.meko123456.pomidori.wear.tile.PomidoriTileService
@@ -26,7 +27,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -42,8 +42,8 @@ import kotlinx.coroutines.launch
 class WatchTimerService : Service() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val loop = TimerLoop(clock = SystemClock::elapsedRealtime)
     private var loopJob: Job? = null
-    private var lastMark = 0L
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -73,23 +73,10 @@ class WatchTimerService : Service() {
             return
         }
         if (loopJob != null) return
-        lastMark = SystemClock.elapsedRealtime()
         loopJob = scope.launch {
-            while (TimerController.snapshot.isRunning) {
-                delay(TICK_MILLIS)
-                val now = SystemClock.elapsedRealtime()
-                val finished = TimerController.tick(now - lastMark)
-                lastMark = now
-                if (finished) {
-                    buzz()
-                    showChange()
-                    if (!TimerController.snapshot.isRunning) {
-                        // Auto-start is off: the next phase waits, idle, for a tap.
-                        stopAll()
-                        return@launch
-                    }
-                }
-            }
+            loop.run(onPhaseEnd = { buzz(); showChange() })
+            // Returned on its own: a phase ended with auto-start off, and the next waits for a tap.
+            if (TimerController.snapshot.timer.status == TimerStatus.IDLE) stopAll()
         }
     }
 
@@ -182,6 +169,5 @@ class WatchTimerService : Service() {
 
         private const val CHANNEL_ID = "timer"
         private const val NOTIFICATION_ID = 1
-        private const val TICK_MILLIS = 250L
     }
 }

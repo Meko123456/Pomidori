@@ -20,13 +20,13 @@ import io.github.meko123456.pomidori.data.SessionTallyRepository
 import io.github.meko123456.pomidori.timer.NotificationContent
 import io.github.meko123456.pomidori.timer.Phase
 import io.github.meko123456.pomidori.timer.TimerController
+import io.github.meko123456.pomidori.timer.TimerLoop
 import io.github.meko123456.pomidori.timer.TimerStatus
 import java.time.LocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
@@ -43,8 +43,8 @@ class TimerService : Service() {
     // TimerController is a MutableStateFlow updated through `update {}`, so it is safe from here.
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val tally by lazy { SessionTallyRepository(applicationContext) }
+    private val loop = TimerLoop(clock = SystemClock::elapsedRealtime)
     private var loopJob: Job? = null
-    private var lastMark = 0L
 
     /** What is currently on screen, so an unchanged tick can be skipped. */
     private var shown: NotificationContent? = null
@@ -83,30 +83,20 @@ class TimerService : Service() {
             return
         }
         if (loopJob != null) return
-        lastMark = SystemClock.elapsedRealtime()
         loopJob = scope.launch {
-            while (TimerController.snapshot.isRunning) {
-                delay(250)
-                val now = SystemClock.elapsedRealtime()
-                val finishingPhase = TimerController.snapshot.position.phase
-                val finished = TimerController.tick(now - lastMark)
-                lastMark = now
-                if (finished) {
-                    if (finishingPhase == Phase.FOCUS) {
+            loop.run(
+                onPhaseEnd = { ended ->
+                    if (ended == Phase.FOCUS) {
                         scope.launch { tally.increment(LocalDate.now().toEpochDay()) }
                     }
                     chimeAndVibrate()
-                    if (!TimerController.snapshot.isRunning) {
-                        // Auto-start is off — the next phase waits idle for the user.
-                        updateNotification()
-                        stopAll()
-                        return@launch
-                    }
-                    // Auto-started the next phase; keep looping from now.
-                    lastMark = SystemClock.elapsedRealtime()
-                }
-                updateNotification()
-            }
+                    updateNotification()
+                },
+                onTick = ::updateNotification,
+            )
+            // The loop returns when the timer stops running on its own: a phase ended with
+            // auto-start off, and the next one waits idle for the user.
+            if (TimerController.snapshot.timer.status == TimerStatus.IDLE) stopAll()
         }
     }
 
