@@ -83,7 +83,11 @@ class WatchTimerService : Service() {
     /** Re-posts the notification and asks for a fresh tile: the two places a change is seen. */
     private fun showChange() {
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification(TimerController.snapshot))
-        TileService.getUpdater(this).requestUpdate(PomidoriTileService::class.java)
+        // The application context, never this service's. The updater binds to the system UI with
+        // whatever it is given and unbinds later on a thread of its own; a skip or an idle phase
+        // end stops this service first, its bindings go with it, and the late unbind then throws
+        // "Service not registered" off the main thread, which takes the whole process down.
+        TileService.getUpdater(applicationContext).requestUpdate(PomidoriTileService::class.java)
     }
 
     private fun notification(snapshot: TimerSnapshot): Notification {
