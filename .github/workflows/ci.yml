@@ -22,8 +22,9 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
+      # The unit tests live in :timer now, with the code they test.
       - name: Build, lint and unit tests
-        run: ./gradlew :app:assembleDebug :app:lintDebug :app:testDebugUnitTest --stacktrace
+        run: ./gradlew :timer:test :app:assembleDebug :app:lintDebug --stacktrace
 
       # Debug builds never run R8, so the shrinker was configured here and never once executed.
       # Without this step, the first time code shrinking runs is release day, which is the worst

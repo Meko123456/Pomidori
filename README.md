@@ -32,23 +32,24 @@ few rounds — with a timer that keeps running when the screen is off.
 
 ## Tech
 
-Single-module Android app: **Jetpack Compose** + Material 3 (dynamic color), a
-foreground **Service** driving the countdown over a shared `StateFlow`,
-**DataStore** for settings and the daily tally, and a **pure Kotlin timer engine
-+ cycle logic** that are unit-tested independently of Android.
+**Jetpack Compose** + Material 3 (dynamic color), a foreground **Service**
+driving the countdown over a shared `StateFlow`, **DataStore** for settings and
+the daily tally, and a **pure Kotlin timer** in a module of its own, unit-tested
+on the JVM without Android.
 
 ```
-timer/     Pure engine (countdown state machine) + cycle logic (phases)  — unit-tested
-service/   Foreground TimerService + shared TimerController (single source of truth)
-ui/        Compose timer & settings screens + ViewModels
-data/      DataStore-backed settings and today's-tally repositories
+:timer        Engine (countdown state machine), cycle logic (phases) and the
+              TimerController that is the single source of truth  — unit-tested
+:app service/ Foreground TimerService driving the shared TimerController
+:app ui/      Compose timer & settings screens + ViewModels
+:app data/    DataStore-backed settings and today's-tally repositories
 ```
 
 ## Build & run
 
 ```bash
 ./gradlew :app:installDebug        # build + install on a running device/emulator
-./gradlew :app:testDebugUnitTest   # run the unit tests (engine, cycle, controller)
+./gradlew :timer:test               # run the unit tests (engine, cycle, controller)
 ```
 
 ## License

@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Pomidori"
 include(":app")
+include(":timer")

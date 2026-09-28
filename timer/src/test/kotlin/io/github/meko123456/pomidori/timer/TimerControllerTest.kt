@@ -1,7 +1,5 @@
-package io.github.meko123456.pomidori.service
+package io.github.meko123456.pomidori.timer
 
-import io.github.meko123456.pomidori.timer.PomodoroConfig
-import io.github.meko123456.pomidori.timer.TimerStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue

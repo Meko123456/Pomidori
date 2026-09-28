@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.meko123456.pomidori.data.SettingsRepository
-import io.github.meko123456.pomidori.service.TimerController
 import io.github.meko123456.pomidori.timer.PomodoroConfig
+import io.github.meko123456.pomidori.timer.TimerController
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

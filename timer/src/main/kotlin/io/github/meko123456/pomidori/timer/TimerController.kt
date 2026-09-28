@@ -1,11 +1,5 @@
-package io.github.meko123456.pomidori.service
+package io.github.meko123456.pomidori.timer
 
-import io.github.meko123456.pomidori.timer.CyclePosition
-import io.github.meko123456.pomidori.timer.PomodoroConfig
-import io.github.meko123456.pomidori.timer.PomodoroCycle
-import io.github.meko123456.pomidori.timer.TimerEngine
-import io.github.meko123456.pomidori.timer.TimerState
-import io.github.meko123456.pomidori.timer.TimerStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,9 +11,12 @@ data class TimerSnapshot(val position: CyclePosition, val timer: TimerState) {
 
 /**
  * Process-wide single source of truth for the timer, shared between the
- * foreground [TimerService] (which advances it and owns the tick loop) and the
+ * foreground service (which advances it and owns the tick loop) and the
  * UI (which observes [state] and issues commands via the service). All
  * transitions delegate to the pure TimerEngine / PomodoroCycle.
+ *
+ * One per process: the phone and the watch each run their own, and neither
+ * knows about the other.
  */
 object TimerController {
 
