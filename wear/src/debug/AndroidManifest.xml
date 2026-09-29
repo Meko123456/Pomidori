@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Debug builds only: stands in for the phone in the settings sync. See the class. -->
+        <receiver
+            android:name="io.github.meko123456.pomidori.wear.debug.FakePhoneConfigReceiver"
+            android:exported="true" />
+    </application>
+</manifest>
