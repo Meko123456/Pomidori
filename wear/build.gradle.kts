@@ -39,6 +39,8 @@ android {
 
 dependencies {
     implementation(project(":timer"))
+    // The timer settings travel phone -> watch through the Wearable data layer.
+    implementation(libs.play.services.wearable)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.activity.compose)
