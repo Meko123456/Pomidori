@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.meko123456.pomidori.data.SettingsRepository
+import io.github.meko123456.pomidori.data.WatchConfigPublisher
 import io.github.meko123456.pomidori.timer.PomodoroConfig
 import io.github.meko123456.pomidori.timer.TimerController
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,17 +14,26 @@ import kotlinx.coroutines.launch
 
 /**
  * Backs the settings screen and keeps [TimerController.config] in sync with the
- * persisted config so the timer always uses the latest durations.
+ * persisted config so the timer always uses the latest durations — on this phone, and on the
+ * watch through [WatchConfigPublisher].
  */
 class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repo = SettingsRepository(app)
+    private val watch = WatchConfigPublisher(app)
 
     val config: StateFlow<PomodoroConfig> =
         repo.config.stateIn(viewModelScope, SharingStarted.Eagerly, PomodoroConfig())
 
     init {
-        viewModelScope.launch { repo.config.collect { TimerController.config = it } }
+        // The watch runs its own timer, so it gets the same lengths: every change, and once per
+        // launch, which is how a watch paired after the settings were chosen catches up.
+        viewModelScope.launch {
+            repo.config.collect {
+                TimerController.config = it
+                watch.publish(it)
+            }
+        }
     }
 
     fun setFocus(min: Int) = viewModelScope.launch { repo.setFocusMinutes(min) }

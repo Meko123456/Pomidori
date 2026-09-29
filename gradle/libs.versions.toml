@@ -12,6 +12,8 @@ wearProtolayout = "1.4.2"
 wearCompose = "1.7.0"
 wearOngoing = "1.1.0"
 concurrentFutures = "1.3.0"
+playServicesWearable = "20.0.1"
+fragment = "1.9.1"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -34,6 +36,8 @@ wear-compose-material3 = { module = "androidx.wear.compose:compose-material3", v
 wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "wearCompose" }
 wear-ongoing = { module = "androidx.wear:wear-ongoing", version.ref = "wearOngoing" }
 androidx-concurrent-futures-ktx = { module = "androidx.concurrent:concurrent-futures-ktx", version.ref = "concurrentFutures" }
+play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
+androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -37,6 +37,12 @@ android {
 
 dependencies {
     implementation(project(":timer"))
+    // The timer settings travel phone -> watch through the Wearable data layer.
+    implementation(libs.play.services.wearable)
+    // play-services-base drags in fragment 1.1.0, and the Activity Result API this app uses for
+    // the notification permission is not safe beside a fragment older than 1.3.0 (lint's
+    // InvalidFragmentVersionForActivityResult). Named here so the new one wins.
+    implementation(libs.androidx.fragment)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.activity.compose)
