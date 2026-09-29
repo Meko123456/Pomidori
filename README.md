@@ -25,7 +25,8 @@ few rounds — with a timer that keeps running when the screen is off.
   **DataStore**.
 - ⌚ **On the watch too** — a standalone Wear OS app with a **tile**: start,
   pause or resume a focus session from the wrist. The tile counts down by
-  itself, and the session shows on the watch face as an ongoing activity.
+  itself, the session shows on the watch face as an ongoing activity, and
+  the lengths are the ones set on the phone.
 
 ## Screenshots
 
@@ -60,6 +61,17 @@ on the JVM without Android.
 The watch runs its own timer rather than remote-controlling the phone's, so it
 works with the phone out of reach. The tile is handed the moment the phase ends
 and counts down to it on the watch, so it never needs an update per second.
+
+The settings travel the other way, phone to watch, as a data item in the
+Wearable data layer (`/pomidori/config`, a versioned map from `ConfigWire` in
+`:timer`). The watch keeps the last one it got, so it has the right lengths even
+when it starts with no phone in reach. A debug build of the watch app can stand
+in for the phone:
+
+```bash
+adb shell am broadcast -n io.github.meko123456.pomidori/.wear.debug.FakePhoneConfigReceiver \
+  --el focus_minutes 50 --el short_break_minutes 10
+```
 
 ## Build & run
 
