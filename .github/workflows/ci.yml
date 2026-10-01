@@ -48,6 +48,19 @@ jobs:
     # (R8 full mode had stripped a constructor a library reaches for by reflection), and every check
     # was green. This installs the R8 build on an emulator, opens it, and fails if it crashes or is
     # not running fifteen seconds later. Proven both ways in Nabiji #13.
+    # Both apps: the phone's on a phone image and the watch's on a Wear OS one. The watch app ships
+    # as its own minified APK, with its own R8 run and its own reflection to lose.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - module: app
+            target: google_apis
+            api-level: 34
+          - module: wear
+            target: android-wear
+            api-level: 33
+    name: release-launches (${{ matrix.module }})
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -63,12 +76,12 @@ jobs:
       # on a throwaway emulator, so this makes one up.
       - name: Build the minified release and sign it with a throwaway key
         run: |
-          ./gradlew :app:assembleRelease --stacktrace
+          ./gradlew :${{ matrix.module }}:assembleRelease --stacktrace
           keytool -genkeypair -keystore "$RUNNER_TEMP/launch.jks" -storepass launchcheck \
             -keypass launchcheck -alias launch -keyalg RSA -keysize 2048 -validity 1 \
             -dname "CN=release launch check"
           BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
-          "$BT/zipalign" -f -p 4 "$(ls app/build/outputs/apk/release/*.apk | head -1)" "$RUNNER_TEMP/aligned.apk"
+          "$BT/zipalign" -f -p 4 "$(ls ${{ matrix.module }}/build/outputs/apk/release/*.apk | head -1)" "$RUNNER_TEMP/aligned.apk"
           "$BT/apksigner" sign --ks "$RUNNER_TEMP/launch.jks" --ks-pass pass:launchcheck \
             --key-pass pass:launchcheck --out "$RUNNER_TEMP/release.apk" "$RUNNER_TEMP/aligned.apk"
 
@@ -85,8 +98,8 @@ jobs:
       - name: Open the release build on an emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
-          target: google_apis
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
           arch: x86_64
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
