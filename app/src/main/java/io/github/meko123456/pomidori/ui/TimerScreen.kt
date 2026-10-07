@@ -4,12 +4,14 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -105,11 +107,20 @@ fun TimerScreen(onOpenSettings: () -> Unit = {}, vm: TimerViewModel = viewModel(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
             ) {
-                OutlinedButton(onClick = vm::reset) { Text("Reset") }
-                Button(onClick = vm::primary, modifier = Modifier.size(width = 140.dp, height = 48.dp)) {
-                    Text(primaryLabel(timer.status))
+                // The main button takes the room the other two leave, up to 140dp. At a fixed
+                // 140dp, Skip, measured last, got about 56dp on a 360dp-wide phone, and its label
+                // wrapped one or two letters to a line. Narrower side padding leaves "Resume"
+                // room on that phone at 1.3x text, too.
+                val padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                OutlinedButton(onClick = vm::reset, contentPadding = padding) { Text("Reset") }
+                Button(
+                    onClick = vm::primary,
+                    modifier = Modifier.weight(1f, fill = false).width(140.dp).height(48.dp),
+                    contentPadding = padding,
+                ) {
+                    Text(primaryLabel(timer.status), maxLines = 1)
                 }
-                OutlinedButton(onClick = vm::skip) { Text("Skip") }
+                OutlinedButton(onClick = vm::skip, contentPadding = padding) { Text("Skip") }
             }
         }
     }
