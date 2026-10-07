@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.meko123456.pomidori.timer.Phase
 import io.github.meko123456.pomidori.timer.TimerStatus
@@ -42,6 +43,10 @@ import kotlin.math.ceil
 fun TimerScreen(onOpenSettings: () -> Unit = {}, vm: TimerViewModel = viewModel()) {
     val snapshot by vm.state.collectAsState()
     val tallyToday by vm.tallyToday.collectAsState()
+    LifecycleResumeEffect(vm) {
+        vm.recheckDay()
+        onPauseOrDispose { }
+    }
     val timer = snapshot.timer
     val position = snapshot.position
     val accent = when (position.phase) {

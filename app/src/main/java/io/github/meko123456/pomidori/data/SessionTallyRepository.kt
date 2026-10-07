@@ -17,9 +17,12 @@ private val Context.tallyStore by preferencesDataStore(name = "pomidori_tally")
  */
 class SessionTallyRepository(private val context: Context) {
 
-    /** Today's count for [todayEpochDay]; 0 when the stored tally is from another day. */
-    fun todayCount(todayEpochDay: Long): Flow<Int> = context.tallyStore.data.map { p ->
-        if (p[DAY] == todayEpochDay) (p[COUNT] ?: 0) else 0
+    /**
+     * Today's count; 0 when the stored tally is from another day. [today] is asked on every change
+     * rather than once, so a session recorded after midnight counts towards the new day.
+     */
+    fun todayCount(today: () -> Long): Flow<Int> = context.tallyStore.data.map { p ->
+        if (p[DAY] == today()) (p[COUNT] ?: 0) else 0
     }
 
     /** Records one completed focus session for [todayEpochDay], rolling over across days. */
