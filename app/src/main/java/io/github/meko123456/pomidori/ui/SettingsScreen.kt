@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +77,10 @@ private fun MinutesSlider(label: String, minutes: Int, range: IntRange, onCommit
         Text("$label — $value min", style = MaterialTheme.typography.bodyLarge)
         Slider(
             value = value.toFloat(),
-            onValueChange = { value = it.toInt() },
+            // Rounded, not truncated: a stepped slider computes each tick in floating point, so the
+            // 25 tick can arrive as 24.999998. With toInt() two ticks showed the same minute, and 11
+            // of the 56 focus lengths (7, 12, 19, 21, 23, 34 and more) could not be picked at all.
+            onValueChange = { value = it.roundToInt() },
             onValueChangeFinished = { onCommit(value) },
             valueRange = range.first.toFloat()..range.last.toFloat(),
             steps = (range.last - range.first - 1).coerceAtLeast(0),
