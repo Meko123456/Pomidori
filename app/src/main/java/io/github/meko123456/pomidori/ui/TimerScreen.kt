@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -32,6 +34,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.meko123456.pomidori.timer.Phase
@@ -84,8 +87,15 @@ fun TimerScreen(onOpenSettings: () -> Unit = {}, vm: TimerViewModel = viewModel(
                 modifier = Modifier.padding(top = 4.dp),
             )
 
+            // The ring takes what height is left, up to 80% of the width. At a fixed 80% the
+            // column was taller than the screen at 200% text, and the buttons under the ring
+            // were cut in half with their labels out of sight.
             Box(
-                modifier = Modifier.padding(vertical = 40.dp).fillMaxWidth(0.8f).aspectRatio(1f),
+                modifier = Modifier
+                    .padding(vertical = 40.dp)
+                    .weight(1f, fill = false)
+                    .fillMaxWidth(0.8f)
+                    .aspectRatio(1f),
                 contentAlignment = Alignment.Center,
             ) {
                 val track = MaterialTheme.colorScheme.surfaceVariant
@@ -123,7 +133,12 @@ fun TimerScreen(onOpenSettings: () -> Unit = {}, vm: TimerViewModel = viewModel(
                     modifier = Modifier.weight(1f, fill = false).width(140.dp).height(48.dp),
                     contentPadding = padding,
                 ) {
-                    Text(primaryLabel(timer.status), maxLines = 1)
+                    // Shrinks to fit rather than clipping: at 200% text "Resume" read "Resu".
+                    Text(
+                        primaryLabel(timer.status),
+                        maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = LocalTextStyle.current.fontSize),
+                    )
                 }
                 OutlinedButton(onClick = vm::skip, contentPadding = padding) { Text("Skip") }
             }
