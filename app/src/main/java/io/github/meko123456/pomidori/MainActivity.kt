@@ -11,7 +11,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
             PomidoriTheme {
                 // Created here so its init syncs saved settings into the timer on launch.
                 val settingsVm: SettingsViewModel = viewModel()
-                var showSettings by remember { mutableStateOf(false) }
+                var showSettings by rememberSaveable { mutableStateOf(false) }
 
                 BackHandler(enabled = showSettings) { showSettings = false }
 
