@@ -30,7 +30,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         // launch, which is how a watch paired after the settings were chosen catches up.
         viewModelScope.launch {
             repo.config.collect {
-                TimerController.config = it
+                TimerController.configure(it)
                 watch.publish(it)
             }
         }

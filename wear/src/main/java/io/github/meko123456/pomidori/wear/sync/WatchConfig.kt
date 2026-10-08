@@ -8,7 +8,6 @@ import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
 import io.github.meko123456.pomidori.timer.ConfigWire
 import io.github.meko123456.pomidori.timer.TimerController
-import io.github.meko123456.pomidori.timer.TimerStatus
 import io.github.meko123456.pomidori.wear.tile.PomidoriTileService
 
 /**
@@ -27,8 +26,7 @@ object WatchConfig {
             return
         }
         WatchConfigStore(context).save(config)
-        TimerController.config = config
-        if (TimerController.snapshot.timer.status == TimerStatus.IDLE) TimerController.reset()
+        TimerController.configure(config)
         TileService.getUpdater(context.applicationContext).requestUpdate(PomidoriTileService::class.java)
     }
 

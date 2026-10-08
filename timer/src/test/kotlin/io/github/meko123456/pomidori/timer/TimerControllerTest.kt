@@ -32,6 +32,40 @@ class TimerControllerTest {
         assertEquals(TimerStatus.IDLE, TimerController.snapshot.timer.status)
     }
 
+    // Other tests leave the cycle on any phase, and reset() keeps it, so these work out what to
+    // expect from the phase they find.
+    private val shorter = PomodoroConfig(focusMillis = 5 * 60_000L, shortBreakMillis = 60_000L, longBreakMillis = 10 * 60_000L)
+    private val longer = PomodoroConfig(focusMillis = 50 * 60_000L, shortBreakMillis = 10 * 60_000L, longBreakMillis = 30 * 60_000L)
+
+    @Test
+    fun `new lengths redraw an idle phase`() {
+        TimerController.config = PomodoroConfig()
+        TimerController.reset()
+
+        TimerController.configure(shorter)
+
+        val phase = TimerController.snapshot.position.phase
+        assertEquals(TimerStatus.IDLE, TimerController.snapshot.timer.status)
+        assertEquals(PomodoroCycle.duration(phase, shorter), TimerController.snapshot.timer.remainingMillis)
+    }
+
+    @Test
+    fun `new lengths leave a session under way alone`() {
+        TimerController.config = PomodoroConfig()
+        TimerController.reset()
+        TimerController.primary() // start
+        val started = TimerController.snapshot.timer.totalMillis
+
+        TimerController.configure(shorter)
+        assertEquals(TimerStatus.RUNNING, TimerController.snapshot.timer.status)
+        assertEquals(started, TimerController.snapshot.timer.totalMillis)
+
+        TimerController.primary() // pause
+        TimerController.configure(longer)
+        assertEquals(TimerStatus.PAUSED, TimerController.snapshot.timer.status)
+        assertEquals(started, TimerController.snapshot.timer.totalMillis)
+    }
+
     @Test
     fun `primary toggles a running timer to paused`() {
         TimerController.config = PomodoroConfig()

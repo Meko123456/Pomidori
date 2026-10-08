@@ -41,6 +41,15 @@ object TimerController {
         }
     }
 
+    /**
+     * Takes new lengths for every phase from here on. An idle phase shows the length it is about to
+     * run, so it is redrawn at the new one; a session under way keeps its length until its next phase.
+     */
+    fun configure(newConfig: PomodoroConfig) {
+        config = newConfig
+        _state.update { s -> if (s.timer.status == TimerStatus.IDLE) idle(s.position) else s }
+    }
+
     fun reset() = _state.update { idle(it.position) }
 
     fun skip() = _state.update { idle(PomodoroCycle.next(it.position, config)) }
