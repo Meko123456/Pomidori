@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,13 +30,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
@@ -172,29 +177,66 @@ private fun TimerControls(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    // Narrower side padding leaves "Resume" room on a 360dp-wide phone at 1.3x text.
+    val padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    // The widest the main button's label gets, so the layout doesn't jump as Start becomes Pause
+    // and Resume.
+    val measurer = rememberTextMeasurer()
+    val labelStyle = MaterialTheme.typography.labelLarge
+    val widestLabel = remember(measurer, labelStyle) {
+        listOf("Start", "Pause", "Resume").maxOf { measurer.measure(it, labelStyle, maxLines = 1, softWrap = false).size.width }
+    }
+    Layout(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-    ) {
-        // The main button takes the room the other two leave, up to 140dp. At a fixed
-        // 140dp, Skip, measured last, got about 56dp on a 360dp-wide phone, and its label
-        // wrapped one or two letters to a line. Narrower side padding leaves "Resume"
-        // room on that phone at 1.3x text, too.
-        val padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        OutlinedButton(onClick = onReset, contentPadding = padding) { Text("Reset") }
-        Button(
-            onClick = onPrimary,
-            modifier = Modifier.weight(1f, fill = false).width(140.dp).height(48.dp),
-            contentPadding = padding,
-        ) {
-            // Shrinks to fit rather than clipping: at 200% text "Resume" read "Resu".
-            Text(
-                primaryLabel(status),
-                maxLines = 1,
-                autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = LocalTextStyle.current.fontSize),
-            )
+        content = {
+            OutlinedButton(onClick = onReset, contentPadding = padding) { Text("Reset") }
+            Button(onClick = onPrimary, modifier = Modifier.heightIn(min = 48.dp), contentPadding = padding) {
+                // Shrinks to fit rather than clipping, should even its own row be too narrow.
+                Text(
+                    primaryLabel(status),
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = LocalTextStyle.current.fontSize),
+                )
+            }
+            OutlinedButton(onClick = onSkip, contentPadding = padding) { Text("Skip") }
+        },
+    ) { measurables, constraints ->
+        val gap = 12.dp.roundToPx()
+        val reset = measurables[0].measure(Constraints())
+        val skip = measurables[2].measure(Constraints())
+        val sides = reset.width + skip.width + 2 * gap
+        if (sides + widestLabel + 32.dp.roundToPx() <= constraints.maxWidth) {
+            // One row. The main button takes the room the other two leave, up to 140dp: at a fixed
+            // 140dp, Skip, measured last, got about 56dp on a 360dp-wide phone, and its label
+            // wrapped one or two letters to a line.
+            val primaryWidth = minOf(140.dp.roundToPx(), constraints.maxWidth - sides)
+            val primary = measurables[1].measure(Constraints.fixedWidth(primaryWidth))
+            val total = sides + primary.width
+            val width = if (constraints.hasFixedWidth) constraints.maxWidth else total
+            layout(width, maxOf(reset.height, primary.height, skip.height)) {
+                var x = Alignment.CenterHorizontally.align(total, width, layoutDirection)
+                reset.place(x, 0)
+                x += reset.width + gap
+                primary.place(x, 0)
+                x += primary.width + gap
+                skip.place(x, 0)
+            }
+        } else {
+            // The main button on a row of its own above Reset and Skip. Kept in one row at large
+            // text it got whatever the other two left, and "Start" shrank to 8sp: the action the
+            // screen is for became the hardest word on it to read.
+            val primaryWidth = minOf(maxOf(140.dp.roundToPx(), widestLabel + 32.dp.roundToPx()), constraints.maxWidth)
+            val primary = measurables[1].measure(Constraints.fixedWidth(primaryWidth))
+            val width = if (constraints.hasFixedWidth) constraints.maxWidth else maxOf(primary.width, sides - gap)
+            val rowHeight = maxOf(reset.height, skip.height)
+            layout(width, primary.height + gap + rowHeight) {
+                primary.place(Alignment.CenterHorizontally.align(primary.width, width, layoutDirection), 0)
+                var x = Alignment.CenterHorizontally.align(sides - gap, width, layoutDirection)
+                reset.place(x, primary.height + gap)
+                x += reset.width + gap
+                skip.place(x, primary.height + gap)
+            }
         }
-        OutlinedButton(onClick = onSkip, contentPadding = padding) { Text("Skip") }
     }
 }
 
