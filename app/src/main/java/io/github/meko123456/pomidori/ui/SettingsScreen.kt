@@ -69,7 +69,9 @@ fun SettingsScreen(onBack: () -> Unit, vm: SettingsViewModel = viewModel()) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("Auto-start next phase", style = MaterialTheme.typography.bodyLarge)
+                // Weighted, so a long label wraps before the switch. Unweighted, at 2x text it took
+                // the whole row and the switch was drawn over its last word.
+                Text("Auto-start next phase", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f).padding(end = 16.dp))
                 Switch(checked = config.autoStartNext, onCheckedChange = null)
             }
         }
