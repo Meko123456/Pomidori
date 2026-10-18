@@ -1,15 +1,23 @@
 package io.github.meko123456.pomidori.data
 
 import android.content.Context
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.github.meko123456.pomidori.timer.PomodoroConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore by preferencesDataStore(name = "pomidori_settings")
+// A file that won't parse is replaced with empty preferences rather than thrown on every read. The
+// CorruptionException from `data` crashed the app at launch, every launch, until its storage was
+// cleared by hand.
+private val Context.dataStore by preferencesDataStore(
+    name = "pomidori_settings",
+    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+)
 
 /**
  * Persists the [PomodoroConfig] with DataStore. Durations are stored in whole

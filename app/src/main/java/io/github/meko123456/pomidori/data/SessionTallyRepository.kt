@@ -1,14 +1,22 @@
 package io.github.meko123456.pomidori.data
 
 import android.content.Context
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.tallyStore by preferencesDataStore(name = "pomidori_tally")
+// A file that won't parse is replaced with empty preferences rather than thrown on every read. The
+// CorruptionException from `data` crashed the app at launch, every launch, until its storage was
+// cleared by hand.
+private val Context.tallyStore by preferencesDataStore(
+    name = "pomidori_tally",
+    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+)
 
 /**
  * Counts focus sessions completed *today*, persisted with DataStore and reset at
