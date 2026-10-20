@@ -183,7 +183,9 @@ class TimerService : Service() {
     private fun ensureChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             getSystemService(NotificationManager::class.java).createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, "Timer", NotificationManager.IMPORTANCE_LOW),
+                NotificationChannel(CHANNEL_ID, "Timer", NotificationManager.IMPORTANCE_LOW).apply {
+                    description = "The focus or break countdown while it runs, with Pause and Skip."
+                },
             )
         }
     }
