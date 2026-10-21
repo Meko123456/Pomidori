@@ -9,6 +9,7 @@ import io.github.meko123456.pomidori.timer.PomodoroConfig
 import io.github.meko123456.pomidori.timer.TimerController
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -35,6 +36,9 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
     }
+
+    /** The saved lengths, read and handed to the timer, for a start that mustn't run the defaults. */
+    suspend fun configured(): PomodoroConfig = repo.config.first().also { TimerController.configure(it) }
 
     fun setFocus(min: Int) = viewModelScope.launch { repo.setFocusMinutes(min) }
     fun setShortBreak(min: Int) = viewModelScope.launch { repo.setShortBreakMinutes(min) }

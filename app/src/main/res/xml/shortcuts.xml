@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Long-press Pomidori's icon: start the timer, as the app's Start button would. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="start_timer"
+        android:icon="@drawable/ic_shortcut_start"
+        android:shortcutShortLabel="@string/shortcut_start_timer_short"
+        android:shortcutLongLabel="@string/shortcut_start_timer_long">
+        <intent
+            android:action="io.github.meko123456.pomidori.action.START_TIMER"
+            android:targetClass="io.github.meko123456.pomidori.MainActivity"
+            android:targetPackage="io.github.meko123456.pomidori" />
+    </shortcut>
+</shortcuts>

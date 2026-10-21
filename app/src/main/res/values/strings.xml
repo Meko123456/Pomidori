@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Pomidori</string>
+    <string name="shortcut_start_timer_short">Start timer</string>
+    <string name="shortcut_start_timer_long">Start the timer</string>
 </resources>
