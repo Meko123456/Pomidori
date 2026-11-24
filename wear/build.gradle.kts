@@ -6,6 +6,8 @@ plugins {
 android {
     namespace = "io.github.meko123456.pomidori.wear"
     compileSdk = 37
+    // 37.1: Compose 1.13's libraries declare it as their minimum (checkAarMetadata).
+    compileSdkMinor = 1
 
     defaultConfig {
         // The phone app's id. To Play, and to the Wearable data layer should the two ever talk,
